@@ -292,7 +292,7 @@ export function QuestionPrompt(props: { request: QuestionRequest; directory?: st
       borderColor={theme.accent}
       customBorderChars={SplitBorder.customBorderChars}
     >
-      <box gap={1} paddingLeft={1} paddingRight={3} paddingTop={1} paddingBottom={1}>
+      <box gap={1} paddingLeft={1} paddingRight={1}>
         <Show when={!single()}>
           <box flexDirection="row" gap={1} paddingLeft={1}>
             <For each={questions()}>
@@ -390,7 +390,7 @@ export function QuestionPrompt(props: { request: QuestionRequest; directory?: st
                         </Show>
                       </box>
 
-                      <box paddingLeft={3}>
+                      <box paddingLeft={1}>
                         <text fg={theme.textMuted}>{opt.description}</text>
                       </box>
                     </box>
@@ -423,7 +423,7 @@ export function QuestionPrompt(props: { request: QuestionRequest; directory?: st
                     </Show>
                   </box>
                   <Show when={store.editing}>
-                    <box paddingLeft={3}>
+                    <box paddingLeft={1}>
                       <textarea
                         ref={(val: TextareaRenderable) => {
                           textarea = val
@@ -445,7 +445,7 @@ export function QuestionPrompt(props: { request: QuestionRequest; directory?: st
                     </box>
                   </Show>
                   <Show when={!store.editing && input()}>
-                    <box paddingLeft={3}>
+                    <box paddingLeft={1}>
                       <text fg={theme.textMuted}>{input()}</text>
                     </box>
                   </Show>
@@ -481,9 +481,8 @@ export function QuestionPrompt(props: { request: QuestionRequest; directory?: st
         flexDirection="row"
         flexShrink={0}
         gap={1}
-        paddingLeft={2}
-        paddingRight={3}
-        paddingBottom={1}
+        paddingLeft={1}
+        paddingRight={1}
         justifyContent="space-between"
       >
         <box flexDirection="row" gap={2}>

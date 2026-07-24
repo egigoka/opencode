@@ -104,7 +104,7 @@ export function ErrorComponent(props: { error: Error; reset: () => void; mode?: 
       flexDirection="column"
       alignItems="center"
     >
-      <box width={contentWidth()} flexGrow={1} flexDirection="column" paddingTop={1} paddingBottom={1} gap={1}>
+      <box width={contentWidth()} flexGrow={1} flexDirection="column" gap={1}>
         {/* Headline */}
         <box flexDirection="column" alignItems="center" flexShrink={0}>
           <text attributes={TextAttributes.BOLD} fg={colors.text}>
@@ -123,8 +123,8 @@ export function ErrorComponent(props: { error: Error; reset: () => void; mode?: 
           borderColor={colors.error}
           title=" Error "
           titleColor={colors.error}
-          paddingLeft={2}
-          paddingRight={2}
+          paddingLeft={1}
+          paddingRight={1}
         >
           <text fg={colors.text}>{message}</text>
         </box>
@@ -143,8 +143,8 @@ export function ErrorComponent(props: { error: Error; reset: () => void; mode?: 
                     backgroundColor={isCopied() ? colors.success : isSelected() ? colors.primary : colors.element}
                     minWidth={15}
                     alignItems="center"
-                    paddingLeft={2}
-                    paddingRight={2}
+                    paddingLeft={1}
+                    paddingRight={1}
                   >
                     <text
                       attributes={TextAttributes.BOLD}

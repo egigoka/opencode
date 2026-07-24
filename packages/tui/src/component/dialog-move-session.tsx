@@ -301,7 +301,7 @@ export function DialogMoveSession(props: DialogMoveSessionProps) {
         options={options()}
         emptyView={
           showError() ? (
-            <box paddingLeft={4} paddingRight={4}>
+            <box paddingLeft={1} paddingRight={1}>
               <text fg={theme.error} attributes={TextAttributes.BOLD}>
                 Could not load project directories
               </text>

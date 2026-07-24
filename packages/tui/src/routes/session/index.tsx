@@ -1163,7 +1163,7 @@ export function Session() {
         }}
       >
         <box flexDirection="row" flexGrow={1} minHeight={0}>
-          <box flexGrow={1} minHeight={0} paddingBottom={1} paddingLeft={2} paddingRight={2} gap={1}>
+          <box flexGrow={1} minHeight={0} paddingLeft={1} paddingRight={1} gap={1}>
             <Show when={session()}>
               <scrollbox
                 ref={(r) => (scroll = r)}
@@ -1183,7 +1183,6 @@ export function Session() {
                 flexGrow={1}
                 scrollAcceleration={scrollAcceleration()}
               >
-                <box height={1} />
                 <For each={messages()}>
                   {(message, index) => (
                     <Switch>
@@ -1216,9 +1215,7 @@ export function Session() {
                               borderColor={theme.backgroundPanel}
                             >
                               <box
-                                paddingTop={1}
-                                paddingBottom={1}
-                                paddingLeft={2}
+                                paddingLeft={1}
                                 backgroundColor={hover() ? theme.backgroundElement : theme.backgroundPanel}
                               >
                                 <text fg={theme.textMuted}>{revert()!.reverted.length} message reverted</text>
@@ -1396,9 +1393,7 @@ function UserMessage(props: {
               setHover(false)
             }}
             onMouseUp={props.onMouseUp}
-            paddingTop={1}
-            paddingBottom={1}
-            paddingLeft={2}
+            paddingLeft={1}
             backgroundColor={hover() ? theme.backgroundElement : theme.backgroundPanel}
             flexShrink={0}
           >
@@ -1493,7 +1488,7 @@ function AssistantMessage(props: { message: AssistantMessage; parts: Part[]; las
         }}
       </For>
       <Show when={props.parts.some((x) => x.type === "tool" && x.tool === "task")}>
-        <box paddingTop={1} paddingLeft={3}>
+        <box paddingLeft={1}>
           <text fg={theme.text}>
             {childShortcut()}
             <span style={{ fg: theme.textMuted }}> view subagents</span>
@@ -1520,9 +1515,7 @@ function AssistantMessage(props: { message: AssistantMessage; parts: Part[]; las
         <box
           ref={(el: BoxRenderable) => alwaysSeparate.add(el)}
           border={["left"]}
-          paddingTop={1}
-          paddingBottom={1}
-          paddingLeft={2}
+          paddingLeft={1}
           marginTop={1}
           backgroundColor={theme.backgroundPanel}
           customBorderChars={SplitBorder.customBorderChars}
@@ -1533,7 +1526,7 @@ function AssistantMessage(props: { message: AssistantMessage; parts: Part[]; las
       </Show>
       <Switch>
         <Match when={props.last || final() || props.message.error?.name === "MessageAbortedError"}>
-          <box ref={(el: BoxRenderable) => alwaysSeparate.add(el)} paddingLeft={3}>
+          <box ref={(el: BoxRenderable) => alwaysSeparate.add(el)} paddingLeft={1}>
             <text marginTop={1}>
               <span
                 style={{
@@ -1600,7 +1593,7 @@ function ReasoningPart(props: { last: boolean; part: ReasoningPart; message: Ass
     <Show when={content()}>
       <box
         ref={(el: BoxRenderable) => alwaysSeparate.add(el)}
-        paddingLeft={3}
+        paddingLeft={1}
         marginTop={1}
         flexDirection="column"
         flexShrink={0}
@@ -1615,7 +1608,7 @@ function ReasoningPart(props: { last: boolean; part: ReasoningPart; message: Ass
           />
         </box>
         <Show when={(!inMinimal() || expanded()) && summary().body}>
-          <box paddingLeft={inMinimal() ? 2 : 0} marginTop={1}>
+          <box paddingLeft={inMinimal() ? 1 : 0} marginTop={1}>
             <code
               filetype="markdown"
               drawUnstyledText={false}
@@ -1681,7 +1674,7 @@ function TextPart(props: { last: boolean; part: TextPart; message: AssistantMess
   const { theme, syntax } = useTheme()
   return (
     <Show when={props.part.text.trim()}>
-      <box ref={(el: BoxRenderable) => alwaysSeparate.add(el)} paddingLeft={3} marginTop={1} flexShrink={0}>
+      <box ref={(el: BoxRenderable) => alwaysSeparate.add(el)} paddingLeft={1} marginTop={1} flexShrink={0}>
         <markdown
           syntaxStyle={syntax()}
           streaming={true}
@@ -1925,7 +1918,7 @@ export function InlineToolRow(props: {
 }) {
   return (
     <box
-      paddingLeft={3}
+      paddingLeft={1}
       onMouseOver={props.onMouseOver}
       onMouseOut={props.onMouseOut}
       onMouseUp={props.onMouseUp}
@@ -1947,7 +1940,7 @@ export function InlineToolRow(props: {
           <Show
             fallback={
               <text
-                paddingLeft={3}
+                paddingLeft={1}
                 fg={props.color}
                 attributes={props.denied ? TextAttributes.STRIKETHROUGH : undefined}
               >
@@ -1999,9 +1992,7 @@ function BlockTool(props: {
     <box
       ref={(el: BoxRenderable) => alwaysSeparate.add(el)}
       border={["left"]}
-      paddingTop={1}
-      paddingBottom={1}
-      paddingLeft={2}
+      paddingLeft={1}
       marginTop={1}
       gap={1}
       backgroundColor={hover() ? theme.backgroundMenu : theme.backgroundPanel}
@@ -2019,7 +2010,7 @@ function BlockTool(props: {
           <Show
             when={props.spinner}
             fallback={
-              <text paddingLeft={3} fg={theme.textMuted}>
+              <text paddingLeft={1} fg={theme.textMuted}>
                 {title()}
               </text>
             }
@@ -2169,8 +2160,8 @@ function Read(props: ToolProps) {
       </InlineTool>
       <For each={loaded()}>
         {(filepath) => (
-          <box paddingLeft={3}>
-            <text paddingLeft={3} fg={theme.textMuted}>
+          <box paddingLeft={1}>
+            <text paddingLeft={1} fg={theme.textMuted}>
               ↳ Loaded {pathFormatter.format(filepath)}
             </text>
           </box>
@@ -2370,10 +2361,10 @@ function Execute(props: ToolProps) {
         {content()}
       </InlineTool>
       <Show when={showOutput()}>
-        <box paddingLeft={3}>
+        <box paddingLeft={1}>
           <For each={outputPreview().split("\n")}>
             {(line, index) => (
-              <text paddingLeft={3} fg={theme.error}>
+              <text paddingLeft={1} fg={theme.error}>
                 {index() === 0 ? "↳ " : "  "}
                 {line}
               </text>

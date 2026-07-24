@@ -173,7 +173,7 @@ function HomeHint(props: { api: TuiPluginApi }) {
   const look = createMemo(() => skin(props.api))
 
   return (
-    <box width="100%" maxWidth={75} alignItems="center" paddingTop={1} flexShrink={0}>
+    <box width="100%" maxWidth={75} alignItems="center" flexShrink={0}>
       <text fg={look().muted} wrapMode="none">
         Show keyboard shortcuts with <span style={{ fg: look().subtle }}>{trigger() || command.toggle}</span>
       </text>
@@ -403,7 +403,6 @@ function WhichKeyPanel(props: {
         backgroundColor={look().panel}
         paddingLeft={1}
         paddingRight={1}
-        paddingTop={1}
         flexShrink={0}
         flexDirection="column"
       >

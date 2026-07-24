@@ -27,7 +27,7 @@ export function DialogAlert(props: DialogAlertProps) {
     ],
   }))
   return (
-    <box paddingLeft={2} paddingRight={2} gap={1}>
+    <box paddingLeft={1} paddingRight={1} gap={1}>
       <box flexDirection="row" justifyContent="space-between">
         <text attributes={TextAttributes.BOLD} fg={theme.text}>
           {props.title}
@@ -36,13 +36,13 @@ export function DialogAlert(props: DialogAlertProps) {
           esc
         </text>
       </box>
-      <box paddingBottom={1}>
+      <box>
         <text fg={theme.textMuted}>{props.message}</text>
       </box>
-      <box flexDirection="row" justifyContent="flex-end" paddingBottom={1}>
+      <box flexDirection="row" justifyContent="flex-end">
         <box
-          paddingLeft={3}
-          paddingRight={3}
+          paddingLeft={1}
+          paddingRight={1}
           backgroundColor={theme.primary}
           onMouseUp={() => {
             props.onConfirm?.()

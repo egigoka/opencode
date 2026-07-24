@@ -34,10 +34,8 @@ function View(props: { api: TuiPluginApi; sessionID: string }) {
       <Show when={show()}>
         <box
           backgroundColor={theme().backgroundElement}
-          paddingTop={1}
-          paddingBottom={1}
-          paddingLeft={2}
-          paddingRight={2}
+          paddingLeft={1}
+          paddingRight={1}
           flexDirection="row"
           gap={1}
         >

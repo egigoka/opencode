@@ -82,7 +82,7 @@ export function DialogExportOptions(props: DialogExportOptionsProps) {
   })
 
   return (
-    <box paddingLeft={2} paddingRight={2} gap={1}>
+    <box paddingLeft={1} paddingRight={1} gap={1}>
       <box flexDirection="row" justifyContent="space-between">
         <text attributes={TextAttributes.BOLD} fg={theme.text}>
           Export Options
@@ -169,13 +169,13 @@ export function DialogExportOptions(props: DialogExportOptionsProps) {
         </box>
       </box>
       <Show when={store.active !== "filename"}>
-        <text fg={theme.textMuted} paddingBottom={1}>
+        <text fg={theme.textMuted}>
           Press <span style={{ fg: theme.text }}>space</span> to toggle, <span style={{ fg: theme.text }}>return</span>{" "}
           to confirm
         </text>
       </Show>
       <Show when={store.active === "filename"}>
-        <text fg={theme.textMuted} paddingBottom={1}>
+        <text fg={theme.textMuted}>
           Press <span style={{ fg: theme.text }}>return</span> to confirm, <span style={{ fg: theme.text }}>tab</span>{" "}
           for options
         </text>

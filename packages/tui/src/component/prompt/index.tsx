@@ -16,7 +16,7 @@ import { fileURLToPath } from "url"
 import { useLocal } from "../../context/local"
 import { Flag } from "@opencode-ai/core/flag/flag"
 import { tint, useTheme } from "../../context/theme"
-import { EmptyBorder, SplitBorder } from "../../ui/border"
+import { SplitBorder } from "../../ui/border"
 import { useTuiPaths, useTuiTerminalEnvironment } from "../../context/runtime"
 import { useClipboard } from "../../context/clipboard"
 import { Spinner } from "../spinner"
@@ -1357,9 +1357,8 @@ export function Prompt(props: PromptProps) {
           }}
         >
           <box
-            paddingLeft={2}
-            paddingRight={2}
-            paddingTop={1}
+            paddingLeft={1}
+            paddingRight={1}
             flexShrink={0}
             backgroundColor={theme.backgroundElement}
             flexGrow={1}
@@ -1438,7 +1437,7 @@ export function Prompt(props: PromptProps) {
               cursorColor={props.disabled ? theme.backgroundElement : theme.text}
               syntaxStyle={syntax()}
             />
-            <box flexDirection="row" flexShrink={0} paddingTop={1} gap={1} justifyContent="space-between">
+            <box flexDirection="row" flexShrink={0} gap={1} justifyContent="space-between">
               <box flexDirection="row" gap={1}>
                 <Show when={local.agent.current()} fallback={<box height={1} />}>
                   {(agent) => (
@@ -1480,32 +1479,6 @@ export function Prompt(props: PromptProps) {
               </Show>
             </box>
           </box>
-        </box>
-        <box
-          height={1}
-          border={["left"]}
-          borderColor={borderHighlight()}
-          customBorderChars={{
-            ...EmptyBorder,
-            vertical: theme.backgroundElement.a !== 0 ? "╹" : " ",
-          }}
-        >
-          <box
-            height={1}
-            border={["bottom"]}
-            borderColor={theme.backgroundElement}
-            customBorderChars={
-              theme.backgroundElement.a !== 0
-                ? {
-                    ...EmptyBorder,
-                    horizontal: "▀",
-                  }
-                : {
-                    ...EmptyBorder,
-                    horizontal: " ",
-                  }
-            }
-          />
         </box>
         <box width="100%" flexDirection="row" justifyContent="space-between">
           <Switch>
@@ -1591,14 +1564,14 @@ export function Prompt(props: PromptProps) {
             </Match>
             <Match when={workspace.notice()}>
               {(notice) => (
-                <box paddingLeft={3}>
+                <box paddingLeft={1}>
                   <text fg={theme.accent}>{notice()}</text>
                 </box>
               )}
             </Match>
             <Match when={workspace.label()}>
               {(label) => (
-                <box paddingLeft={3} flexDirection="row" gap={1}>
+                <box paddingLeft={1} flexDirection="row" gap={1}>
                   <Show when={workspace.creating()}>
                     <Spinner color={theme.accent} />
                   </Show>
@@ -1626,7 +1599,7 @@ export function Prompt(props: PromptProps) {
             </Match>
             <Match when={move.progress()}>
               {(progress) => (
-                <box paddingLeft={3}>
+                <box paddingLeft={1}>
                   <Spinner color={theme.accent}>
                     {progress()}
                     <span style={{ fg: theme.textMuted }}>{".".repeat(move.creatingDots())}</span>
@@ -1635,7 +1608,7 @@ export function Prompt(props: PromptProps) {
               )}
             </Match>
             <Match when={move.pendingNew()}>
-              <box paddingLeft={3}>
+              <box paddingLeft={1}>
                 <text fg={theme.accent}>(new working copy)</text>
               </box>
             </Match>

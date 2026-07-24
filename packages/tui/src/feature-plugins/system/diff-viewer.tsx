@@ -1009,7 +1009,7 @@ function DiffViewerHelpDialog() {
   ]
 
   return (
-    <box paddingLeft={2} paddingRight={2} paddingBottom={1} gap={1}>
+    <box paddingLeft={1} paddingRight={1} gap={1}>
       <box flexDirection="row" justifyContent="space-between">
         <text attributes={TextAttributes.BOLD} fg={theme.text}>
           Diff shortcuts

@@ -388,7 +388,7 @@ export function PermissionPrompt(props: { request: PermissionRequest; directory?
                 <text fg={theme.warning}>{"△"}</text>
                 <text fg={theme.text}>Permission required</text>
               </box>
-              <box flexDirection="row" gap={1} paddingLeft={2} flexShrink={0}>
+              <box flexDirection="row" gap={1} paddingLeft={1} flexShrink={0}>
                 <text fg={theme.textMuted} flexShrink={0}>
                   {current.icon}
                 </text>
@@ -477,7 +477,7 @@ function RejectPrompt(props: { onConfirm: (message: string) => void; onCancel: (
       borderColor={theme.error}
       customBorderChars={SplitBorder.customBorderChars}
     >
-      <box gap={1} paddingLeft={1} paddingRight={3} paddingTop={1} paddingBottom={1}>
+      <box gap={1} paddingLeft={1} paddingRight={1}>
         <box flexDirection="row" gap={1} paddingLeft={1}>
           <text fg={theme.error}>{"△"}</text>
           <text fg={theme.text}>Reject permission</text>
@@ -489,10 +489,8 @@ function RejectPrompt(props: { onConfirm: (message: string) => void; onCancel: (
       <box
         flexDirection={narrow() ? "column" : "row"}
         flexShrink={0}
-        paddingTop={1}
-        paddingLeft={2}
-        paddingRight={3}
-        paddingBottom={1}
+        paddingLeft={1}
+        paddingRight={1}
         backgroundColor={theme.backgroundElement}
         justifyContent={narrow() ? "flex-start" : "space-between"}
         alignItems={narrow() ? "flex-start" : "center"}
@@ -645,7 +643,7 @@ function Prompt<const T extends Record<string, string>>(props: {
             position: "relative",
           })}
     >
-      <box gap={1} paddingLeft={1} paddingRight={3} paddingTop={1} paddingBottom={1} flexGrow={1}>
+      <box gap={1} paddingLeft={1} paddingRight={1} flexGrow={1}>
         <Show
           when={props.header}
           fallback={
@@ -665,10 +663,8 @@ function Prompt<const T extends Record<string, string>>(props: {
         flexDirection={narrow() ? "column" : "row"}
         flexShrink={0}
         gap={1}
-        paddingTop={1}
-        paddingLeft={2}
-        paddingRight={3}
-        paddingBottom={1}
+        paddingLeft={1}
+        paddingRight={1}
         backgroundColor={theme.backgroundElement}
         justifyContent={narrow() ? "flex-start" : "space-between"}
         alignItems={narrow() ? "flex-start" : "center"}

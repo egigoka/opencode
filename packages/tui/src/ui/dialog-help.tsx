@@ -16,7 +16,7 @@ export function DialogHelp() {
   }))
 
   return (
-    <box paddingLeft={2} paddingRight={2} gap={1}>
+    <box paddingLeft={1} paddingRight={1} gap={1}>
       <box flexDirection="row" justifyContent="space-between">
         <text attributes={TextAttributes.BOLD} fg={theme.text}>
           Help
@@ -25,13 +25,13 @@ export function DialogHelp() {
           esc/enter
         </text>
       </box>
-      <box paddingBottom={1}>
+      <box>
         <text fg={theme.textMuted}>
           Press {commandShortcut()} to see all available actions and commands in any context.
         </text>
       </box>
-      <box flexDirection="row" justifyContent="flex-end" paddingBottom={1}>
-        <box paddingLeft={3} paddingRight={3} backgroundColor={theme.primary} onMouseUp={() => dialog.clear()}>
+      <box flexDirection="row" justifyContent="flex-end">
+        <box paddingLeft={1} paddingRight={1} backgroundColor={theme.primary} onMouseUp={() => dialog.clear()}>
           <text fg={theme.selectedListItemText}>ok</text>
         </box>
       </box>

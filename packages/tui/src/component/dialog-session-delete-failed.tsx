@@ -51,7 +51,7 @@ export function DialogSessionDeleteFailed(props: {
   }))
 
   return (
-    <box paddingLeft={2} paddingRight={2} gap={1}>
+    <box paddingLeft={1} paddingRight={1} gap={1}>
       <box flexDirection="row" justifyContent="space-between">
         <text attributes={TextAttributes.BOLD} fg={theme.text}>
           Failed to Delete Session
@@ -66,15 +66,13 @@ export function DialogSessionDeleteFailed(props: {
       <text fg={theme.textMuted} wrapMode="word">
         Choose how you want to recover this broken workspace session.
       </text>
-      <box flexDirection="column" paddingBottom={1} gap={1}>
+      <box flexDirection="column" gap={1}>
         <For each={options}>
           {(item) => (
             <box
               flexDirection="column"
               paddingLeft={1}
               paddingRight={1}
-              paddingTop={1}
-              paddingBottom={1}
               backgroundColor={item.id === store.active ? theme.primary : undefined}
               onMouseUp={() => {
                 setStore("active", item.id)

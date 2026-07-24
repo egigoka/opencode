@@ -555,8 +555,8 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
   }
 
   return (
-    <box gap={1} paddingBottom={1} flexGrow={1}>
-      <box paddingLeft={4} paddingRight={4}>
+    <box gap={1} flexGrow={1}>
+      <box paddingLeft={1} paddingRight={1}>
         <box flexDirection="row" justifyContent="space-between">
           {props.titleView ?? (
             <text fg={theme.text} attributes={TextAttributes.BOLD}>
@@ -600,7 +600,7 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
           when={grouped().length > 0}
           fallback={
             props.emptyView ?? (
-              <box paddingLeft={4} paddingRight={4} paddingTop={1}>
+              <box paddingLeft={1} paddingRight={1}>
                 <text fg={theme.textMuted}>No results found</text>
               </box>
             )
@@ -618,7 +618,7 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
               {([category, options], index) => (
                 <>
                   <Show when={category}>
-                    <box paddingTop={index() > 0 ? 1 : 0} paddingLeft={3}>
+                    <box paddingTop={index() > 0 ? 1 : 0} paddingLeft={1}>
                       <Show
                         when={options[0]?.categoryView}
                         fallback={
@@ -665,8 +665,8 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
                         >
                           <box
                             flexDirection="row"
-                            paddingLeft={current() || option.gutter ? 1 : 3}
-                            paddingRight={3}
+                            paddingLeft={current() || option.gutter ? 0 : 1}
+                            paddingRight={1}
                             gap={1}
                             backgroundColor={
                               active()
@@ -696,7 +696,7 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
                           </box>
                           <For each={option.details}>
                             {(detail) => (
-                              <box paddingLeft={3} paddingRight={3}>
+                              <box paddingLeft={1} paddingRight={1}>
                                 <text fg={theme.textMuted} wrapMode="none">
                                   {Locale.truncateMiddle(detail, Math.max(1, Math.min(76, dimensions().width - 12)))}
                                 </text>
@@ -714,7 +714,7 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
         </Show>
       </box>
       <Show when={props.footer || visibleActions().length} fallback={<box flexShrink={0} />}>
-        <box paddingRight={2} paddingLeft={4} flexDirection="row" justifyContent="space-between" flexShrink={0}>
+        <box paddingRight={1} paddingLeft={1} flexDirection="row" justifyContent="space-between" flexShrink={0}>
           <box flexDirection="row" gap={2}>
             {props.footer}
             <For each={left()}>{(item) => <FooterAction item={item} />}</For>
@@ -768,7 +768,7 @@ function Option(props: {
         attributes={props.active && !props.muted ? TextAttributes.BOLD : undefined}
         overflow="hidden"
         wrapMode="none"
-        paddingLeft={3}
+        paddingLeft={1}
       >
         {props.titleView ??
           (props.truncateTitle === false

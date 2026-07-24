@@ -27,10 +27,8 @@ export function Toast() {
           top={2}
           right={2}
           maxWidth={Math.min(60, dimensions().width - 6)}
-          paddingLeft={2}
-          paddingRight={2}
-          paddingTop={1}
-          paddingBottom={1}
+          paddingLeft={1}
+          paddingRight={1}
           backgroundColor={theme.backgroundPanel}
           borderColor={theme[current().variant]}
           border={["left", "right"]}

@@ -67,7 +67,7 @@ export function DialogWorkspaceFileChanges(props: {
 
   return (
     <box gap={1}>
-      <box flexDirection="row" justifyContent="space-between" paddingLeft={2} paddingRight={2}>
+      <box flexDirection="row" justifyContent="space-between" paddingLeft={1} paddingRight={1}>
         <text attributes={TextAttributes.BOLD} fg={theme.text}>
           {props.title ?? "File Changes Found"}
         </text>
@@ -75,7 +75,7 @@ export function DialogWorkspaceFileChanges(props: {
           esc
         </text>
       </box>
-      <box paddingLeft={2} paddingRight={2}>
+      <box paddingLeft={1} paddingRight={1}>
         <text fg={theme.textMuted} wrapMode="word">
           {props.message ?? "Do you want to move these changes with the session?"}
         </text>
@@ -88,7 +88,7 @@ export function DialogWorkspaceFileChanges(props: {
       >
         <For each={props.files}>
           {(item) => (
-            <box flexDirection="row" justifyContent="space-between" paddingLeft={2} paddingRight={2}>
+            <box flexDirection="row" justifyContent="space-between" paddingLeft={1} paddingRight={1}>
               <box flexDirection="row" minWidth={0} flexShrink={1}>
                 <box width={2} flexShrink={0}>
                   <text fg={theme.textMuted}>{statusLabel(item.status)}</text>
@@ -108,12 +108,12 @@ export function DialogWorkspaceFileChanges(props: {
           )}
         </For>
       </scrollbox>
-      <box flexDirection="row" justifyContent="flex-end" paddingLeft={2} paddingRight={2} paddingBottom={1}>
+      <box flexDirection="row" justifyContent="flex-end" paddingLeft={1} paddingRight={1}>
         <For each={options}>
           {(item) => (
             <box
-              paddingLeft={2}
-              paddingRight={2}
+              paddingLeft={1}
+              paddingRight={1}
               backgroundColor={item === store.active ? theme.primary : undefined}
               onMouseUp={() => {
                 setStore("active", item)

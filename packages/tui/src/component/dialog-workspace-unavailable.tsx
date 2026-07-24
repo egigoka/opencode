@@ -32,7 +32,7 @@ export function DialogWorkspaceUnavailable(props: { onRestore?: () => boolean | 
   }))
 
   return (
-    <box paddingLeft={2} paddingRight={2} gap={1}>
+    <box paddingLeft={1} paddingRight={1} gap={1}>
       <box flexDirection="row" justifyContent="space-between">
         <text attributes={TextAttributes.BOLD} fg={theme.text}>
           Workspace Unavailable
@@ -47,12 +47,12 @@ export function DialogWorkspaceUnavailable(props: { onRestore?: () => boolean | 
       <text fg={theme.textMuted} wrapMode="word">
         Would you like to restore this session into a new workspace?
       </text>
-      <box flexDirection="row" justifyContent="flex-end" paddingBottom={1} gap={1}>
+      <box flexDirection="row" justifyContent="flex-end" gap={1}>
         <For each={options}>
           {(item) => (
             <box
-              paddingLeft={2}
-              paddingRight={2}
+              paddingLeft={1}
+              paddingRight={1}
               backgroundColor={item === store.active ? theme.primary : undefined}
               onMouseUp={() => {
                 setStore("active", item)

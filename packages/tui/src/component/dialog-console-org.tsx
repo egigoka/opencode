@@ -122,7 +122,7 @@ export function DialogConsoleOrg() {
       locked={showError()}
       emptyView={
         showError() ? (
-          <box paddingLeft={4} paddingRight={4}>
+          <box paddingLeft={1} paddingRight={1}>
             <text fg={theme.error} attributes={TextAttributes.BOLD}>
               Could not load orgs
             </text>
