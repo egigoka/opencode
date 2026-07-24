@@ -1,0 +1,79 @@
+name: daily-release
+
+on:
+  schedule:
+    - cron: "41 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.repository == 'egigoka/opencode'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        with:
+          ref: dev
+
+      - uses: ./.github/actions/setup-bun
+
+      - name: Set release metadata
+        id: release
+        run: |
+          SHA=$(git rev-parse HEAD)
+          NOW=$(date -u +%Y%m%d%H%M%S)
+          echo "sha=${SHA}" >> "$GITHUB_OUTPUT"
+          echo "version=0.0.0-daily-${NOW}-${SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Create draft release
+        id: draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.release.outputs.version }}
+          NOTES: |
+            Automated unsigned build of ${{ steps.release.outputs.sha }} from dev.
+
+            macOS, Linux, or Git Bash on Windows:
+            `curl -fsSL https://github.com/egigoka/opencode/releases/latest/download/install.sh | bash`
+
+            Other architectures and baseline builds are attached below. `SHA256SUMS` covers every archive.
+        run: |
+          gh release create "v${VERSION}" \
+            --draft \
+            --target "${{ steps.release.outputs.sha }}" \
+            --title "OpenCode fork daily ${VERSION#0.0.0-daily-}" \
+            --notes "$NOTES"
+
+      - name: Build release binaries
+        env:
+          OPENCODE_CHANNEL: daily
+          OPENCODE_VERSION: ${{ steps.release.outputs.version }}
+          OPENCODE_RELEASE: "1"
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: ./packages/opencode/script/build.ts
+
+      - name: Write checksums
+        working-directory: packages/opencode/dist
+        run: sha256sum ./*.zip ./*.tar.gz > SHA256SUMS
+
+      - name: Publish daily release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          gh release upload "v${VERSION}" install.sh packages/opencode/dist/SHA256SUMS
+          gh release edit "v${VERSION}" --draft=false --latest
+
+      - name: Remove failed draft
+        if: failure() && steps.draft.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: gh release delete "v${VERSION}" --cleanup-tag --yes || true
