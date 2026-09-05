@@ -33,3 +33,6 @@ logs/
 *.bun-build
 tsconfig.tsbuildinfo
 .claude/
+
+# Added by ggshield
+.cache_ggshield

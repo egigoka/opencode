@@ -1,0 +1,7 @@
+version: 2
+secret:
+  ignored_matches:
+    - name: Public Feishu community invite
+      match: 83cf89b03f3d4b4889bace9127e11480b6c5cc94e3e877dc2fc42e179c2fc97f
+    - name: Revocation-owned upstream Cerebras key
+      match: aa5dd974ffd93aeafb59a76af042fa6b1b941f769641a975aa50119ebc0e0b9b
