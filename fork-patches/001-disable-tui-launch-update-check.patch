@@ -1,0 +1,51 @@
+From 3d5e06e1916c916dbd08a79e84d8512d96fe0529 Mon Sep 17 00:00:00 2001
+From: egigoka <egigoka@gmail.com>
+Date: Sat, 5 Sep 2026 19:18:07 +0500
+Subject: [PATCH] fix(tui): disable launch update check
+
+---
+ packages/opencode/src/cli/cmd/tui.ts    | 4 ----
+ packages/opencode/src/cli/tui/worker.ts | 5 -----
+ 2 files changed, 9 deletions(-)
+
+diff --git a/packages/opencode/src/cli/cmd/tui.ts b/packages/opencode/src/cli/cmd/tui.ts
+index 95ffac7ea5..8eba13d20f 100644
+--- a/packages/opencode/src/cli/cmd/tui.ts
++++ b/packages/opencode/src/cli/cmd/tui.ts
+@@ -262,10 +262,6 @@ export const TuiThreadCommand = cmd({
+         return
+       }
+ 
+-      setTimeout(() => {
+-        client.call("checkUpgrade", { directory: cwd }).catch(() => {})
+-      }, 1000).unref?.()
+-
+       try {
+         const { Effect } = await import("effect")
+         const { run } = await import("../tui/layer")
+diff --git a/packages/opencode/src/cli/tui/worker.ts b/packages/opencode/src/cli/tui/worker.ts
+index 4cf6b2d446..51918e253f 100644
+--- a/packages/opencode/src/cli/tui/worker.ts
++++ b/packages/opencode/src/cli/tui/worker.ts
+@@ -1,7 +1,6 @@
+ import { Server } from "@/server/server"
+ import { InstanceRuntime } from "@/project/instance-runtime"
+ import { Rpc } from "@/util/rpc"
+-import { upgrade } from "@/cli/upgrade"
+ import { Config } from "@/config/config"
+ import { GlobalBus } from "@/bus/global"
+ import { ServerAuth } from "@/server/auth"
+@@ -56,10 +55,6 @@ export const rpc = {
+     server = await Server.listen(input)
+     return { url: server.url.toString() }
+   },
+-  async checkUpgrade(input: { directory: string }) {
+-    await InstanceRuntime.load({ directory: input.directory })
+-    await upgrade().catch(() => {})
+-  },
+   async reload() {
+     await AppRuntime.runPromise(
+       Effect.gen(function* () {
+-- 
+2.55.0
+

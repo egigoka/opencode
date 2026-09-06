@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: egigoka <egigoka@gmail.com>
+Date: Sat, 6 Sep 2026 13:10:00 +0500
+Subject: [PATCH] fix(desktop): disable launch update check
+
+Regenerated against upstream/dev tip (was c2b31c61c8, context drifted).
+Removes the launch-time auto-update start, keeps the periodic check timer.
+---
+ packages/desktop/src/main/index.ts | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/packages/desktop/src/main/index.ts b/packages/desktop/src/main/index.ts
+index 183fc634db..f6620c88ce 100644
+--- a/packages/desktop/src/main/index.ts
++++ b/packages/desktop/src/main/index.ts
+@@ -312,7 +312,6 @@ const main = Effect.gen(function* () {
+     },
+   })
+   registerWslIpcHandlers(wslServers)
+-  void updater.start()
+   const updateTimer = setInterval(() => void updater.check(), 10 * 60 * 1000)
+   updateTimer.unref()
+   app.once("will-quit", () => clearInterval(updateTimer))
+--
+2.47.1

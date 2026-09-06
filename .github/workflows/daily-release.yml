@@ -23,13 +23,35 @@ jobs:
 
       - uses: ./.github/actions/setup-bun
 
+      # Build upstream dev plus fork patches, so dailies stay fresh even
+      # when sync-upstream is blocked on merge conflicts. Fork-owned files
+      # (install.sh) are restored over the upstream tree afterwards.
+      # To change release behavior, add/update a file in fork-patches/.
+      - name: Switch to upstream and apply fork patches
+        run: |
+          git remote add upstream https://github.com/anomalyco/opencode.git
+          git fetch upstream dev --depth 1
+          echo "UPSTREAM_SHA=$(git rev-parse FETCH_HEAD)" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/fork-patches" "$RUNNER_TEMP/fork-files"
+          cp fork-patches/*.patch "$RUNNER_TEMP/fork-patches/"
+          cp install.sh "$RUNNER_TEMP/fork-files/"
+          git checkout --detach FETCH_HEAD --quiet
+          cp "$RUNNER_TEMP/fork-files/install.sh" install.sh
+          for p in "$RUNNER_TEMP/fork-patches"/*.patch; do
+            echo "Applying $(basename "$p")"
+            git apply --3way --whitespace=fix "$p"
+          done
+          git status --short
+          git diff --stat
+
       - name: Set release metadata
         id: release
         run: |
-          SHA=$(git rev-parse HEAD)
+          SHA=${UPSTREAM_SHA:?missing upstream sha}
           NOW=$(date -u +%Y%m%d%H%M%S)
           echo "sha=${SHA}" >> "$GITHUB_OUTPUT"
           echo "version=0.0.0-daily-${NOW}-${SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "patches=$(ls "$RUNNER_TEMP/fork-patches" | tr '\n' ' ')" >> "$GITHUB_OUTPUT"
 
       - name: Create draft release
         id: draft
@@ -37,16 +59,18 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.release.outputs.version }}
           NOTES: |
-            Automated unsigned build of ${{ steps.release.outputs.sha }} from dev.
+            Automated unsigned build of anomalyco/opencode@${{ steps.release.outputs.sha }} from dev, plus fork patches: ${{ steps.release.outputs.patches }}
 
             macOS, Linux, or Git Bash on Windows:
             `curl -fsSL https://github.com/egigoka/opencode/releases/latest/download/install.sh | bash`
 
             Other architectures and baseline builds are attached below. `SHA256SUMS` covers every archive.
         run: |
+          # Target dev on purpose: the upstream SHA above may not exist in
+          # this fork yet (sync-upstream can lag). Exact source is in NOTES.
           gh release create "v${VERSION}" \
             --draft \
-            --target "${{ steps.release.outputs.sha }}" \
+            --target dev \
             --title "OpenCode fork daily ${VERSION#0.0.0-daily-}" \
             --notes "$NOTES"
 
