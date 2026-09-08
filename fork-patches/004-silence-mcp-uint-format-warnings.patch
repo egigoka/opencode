@@ -1,0 +1,70 @@
+From f51bdbb99e15a28c6d87886f2ee1b9cd7c5ce96f Mon Sep 17 00:00:00 2001
+From: egigoka <egigoka@gmail.com>
+Date: Tue, 8 Sep 2026 12:43:03 +0500
+Subject: [PATCH] fix(mcp): silence Ajv warnings for protobuf-style uint
+ formats
+
+---
+ packages/opencode/src/mcp/index.ts | 32 ++++++++++++++++++++++++++++++
+ 1 file changed, 32 insertions(+)
+
+diff --git a/packages/opencode/src/mcp/index.ts b/packages/opencode/src/mcp/index.ts
+index 05f12fa2ee..dc63770101 100644
+--- a/packages/opencode/src/mcp/index.ts
++++ b/packages/opencode/src/mcp/index.ts
+@@ -4,6 +4,12 @@ import { LayerNode } from "@opencode-ai/core/effect/layer-node"
+ import { ConfigV1 } from "@opencode-ai/core/v1/config/config"
+ import { serviceUse } from "@opencode-ai/core/effect/service-use"
+ import { Client, type ClientOptions } from "@modelcontextprotocol/sdk/client/index.js"
++import { AjvJsonSchemaValidator } from "@modelcontextprotocol/sdk/validation/ajv"
++import type {
++  JsonSchemaType,
++  JsonSchemaValidator,
++  jsonSchemaValidator,
++} from "@modelcontextprotocol/sdk/validation/types"
+ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js"
+ import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js"
+ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
+@@ -36,6 +42,31 @@ import { McpEvent } from "@opencode-ai/schema/mcp-event"
+ import { McpBrowser } from "./browser"
+ 
+ const DEFAULT_TIMEOUT = 30_000
++
++// MCP servers may declare protobuf-style `format` values (e.g. uint32/uint64)
++// that Ajv does not know. Ajv logs "unknown format ignored" per occurrence,
++// so strip them before delegating. Validation is otherwise unchanged, since
++// Ajv already skipped those format checks.
++const UNSUPPORTED_FORMATS = new Set(["uint32", "uint64", "int32", "int64", "float", "double"])
++
++function stripUnsupportedFormats(node: unknown): unknown {
++  if (Array.isArray(node)) return node.map(stripUnsupportedFormats)
++  if (typeof node !== "object" || node === null) return node
++  const out: Record<string, unknown> = {}
++  for (const [key, value] of Object.entries(node)) {
++    if (key === "format" && typeof value === "string" && UNSUPPORTED_FORMATS.has(value)) continue
++    out[key] = stripUnsupportedFormats(value)
++  }
++  return out
++}
++
++class TolerantValidator implements jsonSchemaValidator {
++  private inner = new AjvJsonSchemaValidator()
++  getValidator<T>(schema: JsonSchemaType): JsonSchemaValidator<T> {
++    return this.inner.getValidator(stripUnsupportedFormats(schema) as JsonSchemaType)
++  }
++}
++
+ const CLIENT_OPTIONS = {
+   capabilities: {
+     // https://github.com/anomalyco/opencode/issues/11948
+@@ -47,6 +78,7 @@ const CLIENT_OPTIONS = {
+     // https://github.com/anomalyco/opencode/issues/28567
+     // tasks: {},
+   },
++  jsonSchemaValidator: new TolerantValidator(),
+ } satisfies ClientOptions
+ 
+ export const Resource = Schema.Struct({
+-- 
+2.55.0
+
