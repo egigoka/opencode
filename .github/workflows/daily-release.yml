@@ -46,15 +46,26 @@ jobs:
 
       - name: Set release metadata
         id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           SHA=${UPSTREAM_SHA:?missing upstream sha}
-          NOW=$(date -u +%Y%m%d%H%M%S)
+          BASE=$(bun -p "require('./packages/opencode/package.json').version")
+          VERSION="${BASE}-e"
           echo "sha=${SHA}" >> "$GITHUB_OUTPUT"
-          echo "version=0.0.0-daily-${NOW}-${SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "base=${BASE}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "patches=$(ls "$RUNNER_TEMP/fork-patches" | tr '\n' ' ')" >> "$GITHUB_OUTPUT"
+          if gh release view "v${VERSION}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Release v${VERSION} already exists, skipping build."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Create draft release
         id: draft
+        if: steps.release.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -72,10 +83,11 @@ jobs:
           gh release create "v${VERSION}" \
             --draft \
             --target dev \
-            --title "OpenCode fork daily ${VERSION#0.0.0-daily-}" \
+            --title "OpenCode fork ${VERSION}" \
             --notes "$NOTES"
 
       - name: Build release binaries
+        if: steps.release.outputs.skip != 'true'
         env:
           OPENCODE_CHANNEL: daily
           OPENCODE_VERSION: ${{ steps.release.outputs.version }}
@@ -85,10 +97,12 @@ jobs:
         run: ./packages/opencode/script/build.ts
 
       - name: Write checksums
+        if: steps.release.outputs.skip != 'true'
         working-directory: packages/opencode/dist
         run: sha256sum ./*.zip ./*.tar.gz > SHA256SUMS
 
       - name: Publish daily release
+        if: steps.release.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
