@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: write
-  workflows: write
 
 concurrency:
   group: sync-upstream
@@ -20,6 +19,6 @@ jobs:
     steps:
       - name: Sync default branch from upstream
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.SYNC_PAT || github.token }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: gh api --method POST "repos/${GITHUB_REPOSITORY}/merge-upstream" -f "branch=${DEFAULT_BRANCH}"
