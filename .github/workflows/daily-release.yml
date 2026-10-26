@@ -1,0 +1,140 @@
+name: daily-release
+
+on:
+  schedule:
+    - cron: "41 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.repository == 'egigoka/opencode'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        with:
+          ref: dev
+
+      # Build upstream dev plus fork patches, so dailies stay fresh even
+      # when sync-upstream is blocked on merge conflicts. Fork-owned files
+      # (install.sh) are restored over the upstream tree afterwards.
+      # To change release behavior, add/update a file in fork-patches/.
+      - name: Switch to upstream and apply fork patches
+        run: |
+          git remote add upstream https://github.com/anomalyco/opencode.git
+          git fetch upstream dev --depth 1
+          echo "UPSTREAM_SHA=$(git rev-parse FETCH_HEAD)" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/fork-patches" "$RUNNER_TEMP/fork-files"
+          cp fork-patches/*.patch "$RUNNER_TEMP/fork-patches/"
+          cp install.sh "$RUNNER_TEMP/fork-files/"
+          git checkout --detach FETCH_HEAD --quiet
+          cp "$RUNNER_TEMP/fork-files/install.sh" install.sh
+          for p in "$RUNNER_TEMP/fork-patches"/*.patch; do
+            echo "Applying $(basename "$p")"
+            git apply --check "$p"
+            git apply "$p"
+          done
+          git status --short
+          git diff --stat
+
+      - uses: ./.github/actions/setup-bun
+        with:
+          install-flags: --frozen-lockfile
+
+      - name: Set release metadata
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SHA=${UPSTREAM_SHA:?missing upstream sha}
+          BASE=$(bun -p "require('./packages/cli/package.json').version")
+          VERSION="${BASE}"
+          patches=$(printf '%s\n' "$RUNNER_TEMP/fork-patches"/*.patch | sed 's|.*/||' | tr '\n' ' ')
+          {
+            echo "sha=${SHA}"
+            echo "base=${BASE}"
+            echo "version=${VERSION}"
+            echo "patches=${patches}"
+          } >> "$GITHUB_OUTPUT"
+          if gh release view "v${VERSION}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Release v${VERSION} already exists, skipping build."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create draft release
+        id: draft
+        if: steps.release.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ steps.release.outputs.version }}
+          NOTES: |
+            Automated unsigned build of anomalyco/opencode@${{ steps.release.outputs.sha }} from dev, plus fork patches: ${{ steps.release.outputs.patches }}
+
+            macOS, Linux, or Git Bash on Windows:
+            `curl -fsSL https://github.com/egigoka/opencode/releases/latest/download/install.sh | bash`
+
+            Other architectures and baseline builds are attached below. `SHA256SUMS` covers every archive.
+        run: |
+          # Target dev on purpose: the upstream SHA above may not exist in
+          # this fork yet (sync-upstream can lag). Exact source is in NOTES.
+          gh release create "v${VERSION}" \
+            --draft \
+            --target dev \
+            --title "OpenCode fork ${VERSION}" \
+            --notes "$NOTES"
+
+      - name: Build release binaries
+        if: steps.release.outputs.skip != 'true'
+        env:
+          OPENCODE_CHANNEL: daily
+          OPENCODE_VERSION: ${{ steps.release.outputs.version }}
+          OPENCODE_RELEASE: "1"
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: ./packages/cli/script/build.ts
+
+      - name: Package release binaries
+        if: steps.release.outputs.skip != 'true'
+        working-directory: packages/cli/dist
+        run: |
+          for dir in cli-*; do
+            target=${dir#cli-}
+            case "$target" in
+              linux-*) tar -czf "opencode-$target.tar.gz" -C "$dir/bin" opencode ;;
+              windows-*) (cd "$dir/bin" && zip -q "../../opencode-$target.zip" opencode.exe) ;;
+              darwin-*) (cd "$dir/bin" && zip -q "../../opencode-$target.zip" opencode) ;;
+              *) echo "Unknown build target: $target" >&2; exit 1 ;;
+            esac
+          done
+
+      - name: Write checksums
+        if: steps.release.outputs.skip != 'true'
+        working-directory: packages/cli/dist
+        run: sha256sum ./*.zip ./*.tar.gz > SHA256SUMS
+
+      - name: Publish daily release
+        if: steps.release.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          gh release upload "v${VERSION}" install.sh packages/cli/dist/SHA256SUMS packages/cli/dist/*.zip packages/cli/dist/*.tar.gz
+          gh release edit "v${VERSION}" --draft=false --latest
+
+      - name: Remove failed draft
+        if: failure() && steps.draft.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: gh release delete "v${VERSION}" --cleanup-tag --yes || true

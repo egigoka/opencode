@@ -1,0 +1,12 @@
+diff --git a/packages/cli/src/commands/handlers/default.ts b/packages/cli/src/commands/handlers/default.ts
+index 426f5f7f5b..dc697dc188 100644
+--- a/packages/cli/src/commands/handlers/default.ts
++++ b/packages/cli/src/commands/handlers/default.ts
+@@ -82,6 +82,7 @@ export default Runtime.handler(Commands, (input) =>
+         ),
+         checking.withPermits(1),
+         Effect.repeat(Schedule.spaced("10 minutes")),
++        Effect.delay("10 minutes"),
+         Effect.forkScoped({ startImmediately: true }),
+       )
+     preflight.loading()

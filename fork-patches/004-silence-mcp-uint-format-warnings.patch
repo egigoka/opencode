@@ -1,0 +1,83 @@
+diff --git a/packages/core/src/mcp/client.ts b/packages/core/src/mcp/client.ts
+index c8d580291a..b7117f426d 100644
+--- a/packages/core/src/mcp/client.ts
++++ b/packages/core/src/mcp/client.ts
+@@ -31,6 +31,7 @@ import { Cause, Clock, Duration, Effect, Exit, Schedule, Schema } from "effect"
+ import { ConfigMCP } from "@opencode/schema/config/mcp"
+ import type { Session } from "@opencode/schema/session"
+ import { McpStdio } from "./stdio.js"
++import { TolerantValidator } from "./validator.js"
+ 
+ const DEFAULT_STARTUP_TIMEOUT = 30_000
+ const DEFAULT_CATALOG_TIMEOUT = 30_000
+@@ -210,6 +211,7 @@ export const connect = Effect.fnUntraced(function* (
+     const runFork = Effect.runForkWith(context)
+     const runPromise = Effect.runPromiseWith(context)
+     const client = new ToolCheckingClient(clientInfo, {
++      jsonSchemaValidator: new TolerantValidator(),
+       capabilities: {
+         ...(elicitation ? { elicitation: { form: {}, url: {} } } : {}),
+         // Legacy era only: roots are deprecated as of 2026-07-28 and modern servers cannot request them.
+diff --git a/packages/core/src/mcp/validator.ts b/packages/core/src/mcp/validator.ts
+new file mode 100644
+index 0000000000..cecaeeafc4
+--- /dev/null
++++ b/packages/core/src/mcp/validator.ts
+@@ -0,0 +1,26 @@
++import { AjvJsonSchemaValidator } from "@modelcontextprotocol/client/validators/ajv"
++import type { JsonSchemaType, JsonSchemaValidator, jsonSchemaValidator } from "@modelcontextprotocol/client"
++
++// MCP servers may declare protobuf-style `format` values (e.g. uint32/uint64)
++// that Ajv does not know. Ajv logs "unknown format ignored" per occurrence,
++// so strip them before delegating. Validation is otherwise unchanged, since
++// Ajv already skipped those format checks.
++const UNSUPPORTED_FORMATS = new Set(["uint32", "uint64", "int32", "int64", "float", "double"])
++
++function stripUnsupportedFormats(node: unknown): unknown {
++  if (Array.isArray(node)) return node.map(stripUnsupportedFormats)
++  if (typeof node !== "object" || node === null) return node
++  const out: Record<string, unknown> = {}
++  for (const [key, value] of Object.entries(node)) {
++    if (key === "format" && typeof value === "string" && UNSUPPORTED_FORMATS.has(value)) continue
++    out[key] = stripUnsupportedFormats(value)
++  }
++  return out
++}
++
++export class TolerantValidator implements jsonSchemaValidator {
++  private inner = new AjvJsonSchemaValidator()
++  getValidator<T>(schema: JsonSchemaType): JsonSchemaValidator<T> {
++    return this.inner.getValidator(stripUnsupportedFormats(schema) as JsonSchemaType)
++  }
++}
+diff --git a/packages/core/test/mcp-validator.test.ts b/packages/core/test/mcp-validator.test.ts
+new file mode 100644
+index 0000000000..f559ae10cb
+--- /dev/null
++++ b/packages/core/test/mcp-validator.test.ts
+@@ -0,0 +1,25 @@
++import { expect, test } from "bun:test"
++import { TolerantValidator } from "../src/mcp/validator"
++
++test.each([
++  "https://json-schema.org/draft/2020-12/schema",
++  "https://json-schema.org/draft/2019-09/schema",
++  "http://json-schema.org/draft-07/schema#",
++])("validates protobuf-style formats without changing schemas (%s)", ($schema) => {
++  const schema = {
++    $schema,
++    type: "object",
++    required: ["values", "email"],
++    properties: {
++      values: { type: "array", items: { type: "integer", format: "uint32" } },
++      email: { type: "string", format: "email" },
++    },
++  }
++  const original = structuredClone(schema)
++  const validate = new TolerantValidator().getValidator(schema)
++  expect(validate({ values: [42], email: "user@example.com" }).valid).toBe(true)
++  expect(validate({ values: ["42"], email: "user@example.com" }).valid).toBe(false)
++  expect(validate({ values: [42], email: "invalid" }).valid).toBe(false)
++  expect(validate({ values: [42] }).valid).toBe(false)
++  expect(schema).toEqual(original)
++})
