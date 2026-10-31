@@ -1,19 +1,19 @@
 diff --git a/packages/core/src/mcp/client.ts b/packages/core/src/mcp/client.ts
-index c8d580291a..b7117f426d 100644
+index ebee230091..68747f8717 100644
 --- a/packages/core/src/mcp/client.ts
 +++ b/packages/core/src/mcp/client.ts
-@@ -31,6 +31,7 @@ import { Cause, Clock, Duration, Effect, Exit, Schedule, Schema } from "effect"
- import { ConfigMCP } from "@opencode/schema/config/mcp"
+@@ -32,6 +32,7 @@ import { ConfigMCP } from "@opencode/schema/config/mcp"
  import type { Session } from "@opencode/schema/session"
+ import { isRecord } from "@opencode/util/record"
  import { McpStdio } from "./stdio.js"
 +import { TolerantValidator } from "./validator.js"
  
  const DEFAULT_STARTUP_TIMEOUT = 30_000
  const DEFAULT_CATALOG_TIMEOUT = 30_000
-@@ -210,6 +211,7 @@ export const connect = Effect.fnUntraced(function* (
+@@ -222,6 +223,7 @@ export const connect = Effect.fnUntraced(function* (
      const runFork = Effect.runForkWith(context)
      const runPromise = Effect.runPromiseWith(context)
-     const client = new ToolCheckingClient(clientInfo, {
+     const client = new Client(clientInfo, {
 +      jsonSchemaValidator: new TolerantValidator(),
        capabilities: {
          ...(elicitation ? { elicitation: { form: {}, url: {} } } : {}),

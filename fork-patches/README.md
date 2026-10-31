@@ -1,7 +1,7 @@
 # Fork patches for OpenCode dev
 
 The fork tracks upstream `dev`. This port targets upstream commit
-`ed74ec82ce` (cli `2.1.4`). The fork's branch remains `dev`.
+`6c24ec9532` (cli `2.2.5`). The fork's branch remains `dev`.
 
 | Patch                            | Decision | Reason                                                                                                                                            |
 | -------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -47,3 +47,13 @@ Dialogs moved to the shared `DialogLayout` component, which defaults to a
 with `1` in the same spots; rows keep the experiment-gated new-designs values.
 `DialogBleed` gained an optional `inset` prop so the band still spans the
 narrowed padding. The select content-width budget is now a flat `- 7`.
+
+Upstream retired `text.faint` in favor of `text.muted`; the padding patch keeps
+upstream's colors and only changes insets. The retry-countdown test in
+`app-lifecycle.test.tsx` collapses whitespace before matching, because the
+narrower session padding wraps the message differently at 44 columns.
+
+Known failures with these patches applied: `dialog-shell-output.test.tsx` times
+out on upstream too, and the diff-viewer "selectable base" test fails because
+the fork's non-new-designs rows put titles of the current row one cell right of
+unmarked rows.
